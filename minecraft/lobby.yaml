@@ -1,0 +1,50 @@
+apiVersion: agones.dev/v1
+kind: Fleet
+metadata:
+  name: "lobby"
+  namespace: towerdefence
+
+spec:
+  replicas: 1
+  scheduling: Packed
+
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+
+  template:
+    metadata:
+      generateName: "lobby"
+      namespace: towerdefence
+
+    spec:
+      ports:
+        - name: default
+          portPolicy: Dynamic
+          containerPort: 25565
+          protocol: TCP
+
+      health:
+        initialDelaySeconds: 10
+        periodSeconds: 15
+        failureThreshold: 2
+
+      template:
+        spec:
+          containers:
+            - name: lobby
+              image: towerdefence-cc/lobby:dev
+              imagePullPolicy: IfNotPresent # todo add resource requests/requirements
+
+              env:
+                - name: minestom.velocity-forwarding-secret
+                  valueFrom:
+                    secretKeyRef:
+                      name: velocity-forwarding-token
+                      key: forwarding.secret
+                      optional: false
+
+                - name: MAX_PLAYERS
+                  value: "100"

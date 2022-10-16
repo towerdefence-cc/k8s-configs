@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: player-tracker
+  namespace: towerdefence
+  labels:
+    app: player-tracker
+
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: player-tracker
+
+  template:
+    metadata:
+      labels:
+        app: player-tracker
+    spec:
+      containers:
+        - name: player-tracker
+          image: towerdefence-cc/player-tracker:dev
+          ports:
+            - containerPort: 9090
+
+          env:
+            - name: "SPRING_DATA_MONGODB_URI"
+              valueFrom:
+                secretKeyRef:
+                  name: player-tracker-mongo-connection-string
+                  key: connectionString.standard
+#            - name: "SPRING_DATA_MONGODB_USERNAME"
+#              valueFrom:
+#                secretKeyRef:
+#                  name: player-tracker-mongo-scram-credentials
+#                  key: username
+---
+
+apiVersion: v1
+kind: Service
+
+metadata:
+  namespace: towerdefence
+  name: player-tracker
+
+spec:
+  type: ClusterIP
+  ports:
+    - name: grpc
+      port: 9090
+      targetPort: 9090
+
+  selector:
+    app: player-tracker
+

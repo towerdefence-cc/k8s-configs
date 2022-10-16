@@ -1,0 +1,57 @@
+apiVersion: mongodbcommunity.mongodb.com/v1
+kind: MongoDBCommunity
+metadata:
+  name: player-tracker-mongo
+  namespace: mongodb
+
+spec:
+  members: 2
+  type: ReplicaSet
+  version: "6.0.2"
+  security:
+    authentication:
+      modes: [ "SCRAM" ]
+  users:
+    - name: user
+      db: admin
+      passwordSecretRef: # a reference to the secret that will be used to generate the user's password
+        name: player-tracker-mongo-password
+      roles:
+        - name: clusterAdmin
+          db: admin
+        - name: userAdminAnyDatabase
+          db: admin
+        - name: readWriteAnyDatabase
+          db: admin
+      scramCredentialsSecretName: player-tracker-mongo-scram-credentials
+      connectionStringSecretName: player-tracker-mongo-connection-string
+  additionalMongodConfig:
+    storage.wiredTiger.engineConfig.journalCompressor: zlib
+
+  # todo requirements should be different in a production environment
+  statefulSet:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: mongod
+              resources:
+                requests:
+                  cpu: "0.1"
+                  memory: 100M
+                limits:
+                  cpu: "0.1"
+                  memory: 100M
+
+# This is just an example that this secret should exist.
+# This secret should not be created from this definition.
+#---
+#apiVersion: v1
+#kind: Secret
+#metadata:
+#  name: player-tracker-mongo-password
+#  namespace: mongodb
+#
+#type: Opaque
+#stringData:
+#  password: example

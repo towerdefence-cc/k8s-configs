@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: server-discovery
+  namespace: towerdefence
+  labels:
+    app: server-discovery
+
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: server-discovery
+
+  template:
+    metadata:
+      labels:
+        app: server-discovery
+    spec:
+      containers:
+        - name: server-discovery
+          image: towerdefence-cc/server-discovery:dev
+          ports:
+            - containerPort: 9090
+
+          volumeMounts:
+            - mountPath: "/secrets/keys"
+              name: "keys"
+              readOnly: true
+
+          env:
+            - name: "SPRING_PROFILES_ACTIVE"
+              value: "production"
+
+      volumes:
+        - name: "keys"
+          secret:
+            secretName: "allocator-client.custom"
+            optional: false
+
+---
+
+apiVersion: v1
+kind: Service
+
+metadata:
+  namespace: towerdefence
+  name: server-discovery
+
+spec:
+  type: ClusterIP
+  ports:
+    - name: grpc
+      port: 9090
+      targetPort: 9090
+
+  selector:
+    app: server-discovery

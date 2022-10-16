@@ -1,0 +1,67 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: velocity-forwarding-token
+  namespace: towerdefence
+
+type: Opaque
+data:
+  forwarding.secret: "nXCx8fPh2b4M" # dont use this in production or ur actually an idiot :)
+
+---
+
+apiVersion: agones.dev/v1
+kind: Fleet
+metadata:
+  name: "velocity"
+  namespace: towerdefence
+
+spec:
+  replicas: 1
+  scheduling: Packed
+
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+
+  template:
+    metadata:
+      generateName: "velocity"
+      namespace: towerdefence
+
+    spec:
+      ports:
+        - name: default
+          portPolicy: Dynamic
+          containerPort: 25565
+          protocol: TCP
+
+      health:
+        initialDelaySeconds: 10
+        periodSeconds: 15
+        failureThreshold: 2
+
+      template:
+        spec:
+          containers:
+            - name: velocity
+              image: towerdefence-cc/velocity:dev
+              imagePullPolicy: IfNotPresent # todo add resource requests/requirements
+
+              lifecycle:
+                postStart:
+                  exec:
+                    command: [ "/bin/sh", "-c", "echo $VELOCITY_FORWARDING_SECRET > /velocity/forwarding.secret" ]
+
+              env:
+                - name: VELOCITY_FORWARDING_SECRET
+                  valueFrom:
+                    secretKeyRef:
+                      name: velocity-forwarding-token
+                      key: forwarding.secret
+                      optional: false
+
+          serviceAccountName: velocity
+          automountServiceAccountToken: true
