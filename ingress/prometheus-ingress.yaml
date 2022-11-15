@@ -1,0 +1,21 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: prometheus-ingress
+  namespace: monitoring
+spec:
+  entryPoints:
+    - websecure
+
+  routes:
+    - match: Host(`prometheus.towerdefence.cc`) # Replace the domain you wish to use.
+      kind: Rule
+      services:
+        - name: prometheus-kube-prometheus-prometheus
+          port: 9090
+  tls:
+    certResolver: resolver
+    domains:
+      - main: "prometheus.towerdefence.cc"
+
+---

@@ -1,34 +1,39 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: player-tracker
+  name: friend-manager
   namespace: towerdefence
   labels:
-    app: player-tracker
+    app: friend-manager
 
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: player-tracker
+      app: friend-manager
 
   template:
     metadata:
       labels:
-        app: player-tracker
+        app: friend-manager
     spec:
       containers:
         - name: player-tracker
-          image: ghcr.io/towerdefence-cc/towerdefence-cc/player-tracker:889fc36c3ffa2cd7875652de1d786f25b2543574
+          image: ghcr.io/towerdefence-cc/friend-manager-service:0759590ac5729fdf569edcaae1bdbb44593bb570
           ports:
             - containerPort: 9090
 
           env:
+            - name: "SPRING_PROFILES_ACTIVE"
+              value: "production"
             - name: "SPRING_DATA_MONGODB_URI"
               valueFrom:
                 secretKeyRef:
                   name: mongo-connection-string
                   key: connectionString.standard
+
+      serviceAccountName: friend-manager
+      automountServiceAccountToken: true
 ---
 
 apiVersion: v1
@@ -36,7 +41,7 @@ kind: Service
 
 metadata:
   namespace: towerdefence
-  name: player-tracker
+  name: friend-manager
 
 spec:
   type: ClusterIP
@@ -46,5 +51,5 @@ spec:
       targetPort: 9090
 
   selector:
-    app: player-tracker
+    app: friend-manager
 

@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: agones-allocator
+  namespace: towerdefence
+
+data:
+  address: "65.109.85.250"
+  port: "10000"

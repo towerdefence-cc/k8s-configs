@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
         - name: server-discovery
-          image: towerdefence-cc/server-discovery:dev
+          image: ghcr.io/towerdefence-cc/towerdefence-cc/server-discovery:29884ec761833580c263ddd7476ae31ab0750dff
           ports:
             - containerPort: 9090
 
@@ -31,12 +31,29 @@ spec:
           env:
             - name: "SPRING_PROFILES_ACTIVE"
               value: "production"
-
+            - name: "AGONES_ALLOCATOR_ADDRESS"
+              valueFrom:
+                configMapKeyRef:
+                  name: agones-allocator
+                  key: address
+                  optional: false
+            - name: "AGONES_ALLOCATOR_PORT"
+              valueFrom:
+                configMapKeyRef:
+                  name: agones-allocator
+                  key: port
+                  optional: false
       volumes:
         - name: "keys"
-          secret:
-            secretName: "allocator-client.custom"
-            optional: false
+          projected:
+            sources:
+              - secret:
+                  name: "allocator-client.custom"
+                  optional: false
+              - secret:
+                  name: "allocator-client-ca.custom"
+                  optional: false
+
 
 ---
 

@@ -1,25 +1,25 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: player-tracker
+  name: permission
   namespace: towerdefence
   labels:
-    app: player-tracker
+    app: permission
 
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: player-tracker
+      app: permission
 
   template:
     metadata:
       labels:
-        app: player-tracker
+        app: permission
     spec:
       containers:
-        - name: player-tracker
-          image: ghcr.io/towerdefence-cc/towerdefence-cc/player-tracker:889fc36c3ffa2cd7875652de1d786f25b2543574
+        - name: permission
+          image: ghcr.io/towerdefence-cc/permission-service:32942b282af04229fbaedf7c2ecae72532242639
           ports:
             - containerPort: 9090
 
@@ -36,7 +36,7 @@ kind: Service
 
 metadata:
   namespace: towerdefence
-  name: player-tracker
+  name: permission
 
 spec:
   type: ClusterIP
@@ -46,5 +46,5 @@ spec:
       targetPort: 9090
 
   selector:
-    app: player-tracker
+    app: permission
 

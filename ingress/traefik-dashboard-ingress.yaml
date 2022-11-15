@@ -1,0 +1,38 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: traefik-dashboard
+
+spec:
+  entryPoints:
+    - websecure
+    - web
+
+  routes:
+    - match: Host(`traefik.towerdefence.cc`) && (PathPrefix(`/api`) || PathPrefix(`/dashboard`))
+      kind: Rule
+      services:
+        - name: api@internal
+          kind: TraefikService
+
+  tls:
+    certResolver: resolver
+    domains:
+      - main: "traefik.towerdefence.cc"
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: auth
+spec:
+  basicAuth:
+    secret: authsecret # Kubernetes secret named "secretName"
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: authsecret
+data:
+  users: |2
+    emFrOiRhcHIxJDdYdnFqWGJ3JHFtSGRNQ0Z3WElJQUxpT1E4TXVxeDAKCg==

@@ -1,0 +1,19 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: metrics-ingress
+  namespace: monitoring
+spec:
+  entryPoints:
+    - websecure
+
+  routes:
+    - match: Host(`metrics.towerdefence.cc`) # Replace the domain you wish to use.
+      kind: Rule
+      services:
+        - name: prometheus-grafana
+          port: 80
+  tls:
+    certResolver: resolver
+    domains:
+      - main: "metrics.towerdefence.cc"

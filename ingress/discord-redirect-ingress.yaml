@@ -1,0 +1,39 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: discord-redirect
+  namespace: default
+
+spec:
+  redirectRegex:
+    permanent: true
+    regex: ".*"
+    replacement: "https://discord.gg/mtY7n8Apme"
+
+---
+
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: discord-redirect
+  namespace: default
+
+spec:
+  entryPoints:
+    - websecure
+
+  routes:
+    - kind: Rule
+      match: Host(`towerdefence.cc`) && Path(`/discord`) && Method(`GET`)
+
+      services:
+        - name: noop@internal
+          kind: TraefikService
+
+      middlewares:
+        - name: discord-redirect
+          namespace: default
+  tls:
+    certResolver: automatic-resolver
+    domains:
+      - main: "towerdefence.cc"

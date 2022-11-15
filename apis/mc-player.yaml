@@ -1,25 +1,26 @@
+# todo
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: player-tracker
+  name: mc-player
   namespace: towerdefence
   labels:
-    app: player-tracker
+    app: mc-player
 
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: player-tracker
+      app: mc-player
 
   template:
     metadata:
       labels:
-        app: player-tracker
+        app: mc-player
     spec:
       containers:
         - name: player-tracker
-          image: ghcr.io/towerdefence-cc/towerdefence-cc/player-tracker:889fc36c3ffa2cd7875652de1d786f25b2543574
+          image: ghcr.io/towerdefence-cc/mc-player-service:c7d210939ebf9d3a0d83a895e0d6f4dc2e373147
           ports:
             - containerPort: 9090
 
@@ -36,7 +37,7 @@ kind: Service
 
 metadata:
   namespace: towerdefence
-  name: player-tracker
+  name: mc-player
 
 spec:
   type: ClusterIP
@@ -46,5 +47,23 @@ spec:
       targetPort: 9090
 
   selector:
-    app: player-tracker
+    app: mc-player
+---
+
+apiVersion: v1
+kind: Service
+
+metadata:
+  namespace: towerdefence
+  name: mc-player-security
+
+spec:
+  type: ClusterIP
+  ports:
+    - name: grpc
+      port: 9090
+      targetPort: 9090
+
+  selector:
+    app: mc-player
 

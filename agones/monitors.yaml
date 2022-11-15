@@ -1,0 +1,41 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+
+metadata:
+  name: agones-allocator-monitor
+  namespace: monitoring
+  labels:
+    app: prometheus
+
+spec:
+  podMetricsEndpoints:
+    - port: metrics
+  namespaceSelector:
+    matchNames:
+      - agones-system
+  selector:
+    matchLabels:
+      app: agones
+
+---
+
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+
+metadata:
+  name: agones-controller-monitor
+  namespace: monitoring
+  labels:
+    app: prometheus
+
+spec:
+  podMetricsEndpoints:
+    - port: http
+
+  namespaceSelector:
+    matchNames:
+      - agones-system
+  selector:
+    matchLabels:
+      app: agones
+      agones.dev/role: controller

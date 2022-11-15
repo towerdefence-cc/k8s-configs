@@ -1,7 +1,7 @@
 apiVersion: agones.dev/v1
 kind: Fleet
 metadata:
-  name: "lobby"
+  name: "void-otp"
   namespace: towerdefence
 
 spec:
@@ -16,7 +16,7 @@ spec:
 
   template:
     metadata:
-      generateName: "lobby"
+      generateName: "void-otp-server"
       namespace: towerdefence
 
     spec:
@@ -34,8 +34,8 @@ spec:
       template:
         spec:
           containers:
-            - name: lobby
-              image: ghcr.io/towerdefence-cc/lobby:1.0.43
+            - name: server
+              image: ghcr.io/towerdefence-cc/void-server:1.0.2
               imagePullPolicy: IfNotPresent
 
               env:
@@ -48,13 +48,19 @@ spec:
 
                 - name: MAX_PLAYERS
                   value: "100"
+                - name: SERVER_CONTROL_MODULE
+                  value: "OTP"
                 - name: minestom.tps
-                  value: "10"
+                  value: "1"
+                - name: minestom.chunk-view-distance
+                  value: "2"
+                - name: minestom.entity-view-distance
+                  value: "0"
 
               resources:
                 limits:
                   memory: "512Mi"
-                  cpu: "1"
+                  cpu: "200m"
                 requests:
-                  cpu: "250m"
+                  cpu: "100m"
                   memory: "256Mi"
